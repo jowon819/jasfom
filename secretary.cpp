@@ -3,6 +3,7 @@
 /* This is Jowon's Personal secretary. */
 /* Jowon Think this as a friend. */
 /* Jasfom was born 2015. 4. 17 */
+/* This is the first Version. 1.0 */
 
 
 #include <iostream>
