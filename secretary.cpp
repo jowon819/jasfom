@@ -14,6 +14,20 @@
 
 using namespace std;
 
+/* Execute command */
+bool pipeOpen(const char * comm){
+    FILE * file = popen(comm, "r");
+    
+    if (file == NULL)
+        return false;
+    pclose(file);
+    return true;
+}
+
+FILE * pipeOpen(const char *comm) {
+    
+}
+
 void informWeather() {
     
     // today weather information
@@ -132,7 +146,7 @@ void informWeather() {
     }
     
     /* pipe open to say Today or Tonight - ... */
-    file = popen ( popenParam, "r" );
+    pipeOpen(popenParam);
     pclose ( file );
     
     /* clear vector */
@@ -148,48 +162,38 @@ void informTime(){
     timer = time(NULL);
     t = localtime(&timer);
     
+    char popenParam[100];
+    char oTime[10];
     FILE * file;
+    
     int hour = t->tm_hour;
     
-    char popenParam[100];
+    
+    cout << "Jasfom speaking..." << endl;
     
     if (hour <5)
     {
-        cout << "Jasfom speaking..." << endl;
-        cout << "   It is " << t->tm_hour << ":" << t->tm_min  <<" AM. Sir, you have to sleep now." << endl;
-        sprintf(popenParam, "say It is %d : %d A m. Sir, you have to sleep now.", t->tm_hour, t->tm_min);
-        file = popen (popenParam, "r");
-
-        pclose(file);
+        cout << "   It's " << oTime  <<" AM. Sir, you have to sleep now." << endl;
+        sprintf(popenParam, "say Its %d %d AM. Sir, you have to sleep now.", hour, t->tm_min);
+        pipeOpen(popenParam);
         
     }else if(hour < 12)
     {
-        printf("Good morning, Sir. It is Great day.\n");
-        cout << "Jasfom speaking..." << endl;
-        cout << "   It is " << t->tm_hour << ":" << t->tm_min  <<" AM. Good morning, Sir. It is Great day." << endl;
-        sprintf(popenParam, "say It is %d : %d A m., Good morning, Sir. It is Great day.", t->tm_hour, t->tm_min);
-        file = popen (popenParam, "r");
-
-        pclose(file);
+        cout << "   It's " << oTime  <<" AM. Good morning, Sir. It is Great day." << endl;
+        sprintf(popenParam, "say Its %d, %d AM. Good morning, Sir. It is Great day.", t->tm_hour, t->tm_min);
+        pipeOpen(popenParam);
     }
     else if(hour >= 12)
     {
-        printf("Good afternoon, Sir. Enjoy your day.\n");
-        cout << "Jasfom speaking..." << endl;
-        cout << "   It is " << t->tm_hour << ":" << t->tm_min  <<" PM. Good afternoon, Sir. Enjoy your day." << endl;
-        sprintf(popenParam, "say It is %d : %d P m. Good afternoon, Sir. Enjoy your day.", t->tm_hour, t->tm_min);
-        file = popen (popenParam, "r");
-        pclose (file);
+        cout << "   It's " << oTime  <<" PM. Good afternoon, Sir. Enjoy your day." << endl;
+        sprintf(popenParam, "say Its %d %d PM. Good afternoon, Sir. Enjoy your day.", hour, t->tm_min);
+        pipeOpen(popenParam);
     }
     else
     {
-        printf("Sir, Today is the first day of the rest of your life.\n");
-        cout << "Jasfom speaking..." << endl;
-        cout << "   It is " << t->tm_hour << ":" << t->tm_min  <<" AM. Sir, Today is the first day of the rest of your life." << endl;
-        sprintf(popenParam, "say It is %d : %d A m. Sir, Today is the first day of the rest of your life.", t->tm_hour, t->tm_min);
-        file = popen (popenParam, "r");
-        pclose(file);
-        
+        cout << "   It's " << oTime  <<" AM. Sir, Today is the first day of the rest of your life." << endl;
+        sprintf(popenParam, "say Its %d %d AM. Sir, Today is the first day of the rest of your life.", t->tm_hour, t->tm_min);
+        pipeOpen(popenParam);
     }
 }
 
@@ -202,25 +206,25 @@ int main(int argc, const char*argv[])
     if (argc > 1){
         
         /* Human friendly message.
-        for (int i=0; i<argc-1; i++){
-            args += argv[i+1];
-            args += " ";
-        }*/
+         for (int i=0; i<argc-1; i++){
+         args += argv[i+1];
+         args += " ";
+         }*/
         
         /* when "who" command */
         if (!(strcmp(argv[1], parameters[0].c_str())))
         {
             cout << "Jasfom speaking..." << endl;
-            popen("say I am your secretary Jasfom, Sir.","r");
             cout << "   I am your secretary Jasfom, Sir." << endl;
+            pipeOpen("say I am your secretary Jasfom, Sir.");
         }
-
+        
         /* when "pintos" command */
         if(!(strcmp(argv[1], parameters[1].c_str())))
         {
-            popen("say You need to do pintos study. Sir.", "r");
             cout << "Jasfom speaking..." << endl;
             cout << "   You need to do pintos study. Sir." << endl;
+            pipeOpen("say You need to do pintos study. Sir.");
         }
         
         /* when "wt or weather" command */
@@ -235,12 +239,13 @@ int main(int argc, const char*argv[])
     }
     else {
         /* when just input jasfom*/
-        popen("say What can I help you?, Sir.","r");
         cout << "Jasfom speaking..." << endl;
         cout << "   What can I help you?, Sir." << endl;
-
+        pipeOpen("say What can I help you?, Sir.");
     }
     return 0;
 }
+
+
 
 
