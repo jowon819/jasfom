@@ -25,12 +25,18 @@ bool pipeOpen(const char * comm){
     return true;
 }
 
-FILE * pipeOpen(const char *comm) {
+/* To get weather Information */
+char * pipeOpen(const char * comm, const char * type) {
 
+    static char buffer[STRINGSIZE];
+    FILE * file = popen(comm, "r");
     fgets (buffer, STRINGSIZE, file);
+    pclose (file);
     
+    return buffer;
 }
 
+/* To display weather information : this function use function - pipOpen() */
 void informWeather() {
     
     // today weather information
