@@ -12,9 +12,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#define STRINGSIZE 200
 using namespace std;
 
-/* Execute command */
+/* To execute command */
 bool pipeOpen(const char * comm){
     FILE * file = popen(comm, "r");
     
@@ -25,6 +26,8 @@ bool pipeOpen(const char * comm){
 }
 
 FILE * pipeOpen(const char *comm) {
+
+    fgets (buffer, STRINGSIZE, file);
     
 }
 
@@ -35,21 +38,25 @@ void informWeather() {
     // tonight weather information
     vector<string> tonightWInfo;
     
-    char buffer[200];
-    char popenParam[100];
+    // string of param
+    char popenParam[STRINGSIZE];
+    
+    // to input vector<string token>
+    string tempForToken;
+    
+    // token saver
+    char * token;
+    
+    // weather information saver
+    char * weatherInfo;
     
     /* TODAY procedure */
     /* pipe open to get TODAY's weather infomation, and save to buffer */
-    FILE *file = popen("curl -s https://weather.yahoo.com/south-korea/seoul/seoul-1132599/ | awk '/Today -/' | textutil -convert txt -stdin -stdout -format html", "r");
+
+    weatherInfo = pipeOpen("curl -s https://weather.yahoo.com/south-korea/seoul/seoul-1132599/ | awk '/Today -/' | textutil -convert txt -stdin -stdout -format html", "r");
     
-    fgets(buffer, 200, file);
-    pclose ( file );
-    
-    // for tokenizing
-    char * token;
     /* tokenizing procedure */
-    token = strtok (buffer, ".");
-    string tempForToken;
+    token = strtok (weatherInfo, ".");
     
     /* tokenize and push it to today's vector */
     while (token != NULL)
@@ -62,13 +69,10 @@ void informWeather() {
     
     /* TONIGHT procedure */
     /* pipe open to get TONIGHT's weather infomation, and save to buffer */
-    file = popen("curl -s https://weather.yahoo.com/south-korea/seoul/seoul-1132599/ | awk '/Tonight -/' | textutil -convert txt -stdin -stdout -format html", "r");
-    
-    fgets(buffer, 200, file);
-    pclose ( file );
+    weatherInfo = pipeOpen("curl -s https://weather.yahoo.com/south-korea/seoul/seoul-1132599/ | awk '/Tonight -/' | textutil -convert txt -stdin -stdout -format html", "r");
     
     /* tokening procedure */
-    token = strtok (buffer, ".");
+    token = strtok (weatherInfo, ".");
     
     /* tokenize and push it to tonight's vector */
     while (token != NULL)
@@ -78,7 +82,6 @@ void informWeather() {
         tempForToken.clear();
         token = strtok (NULL, ".");
     }
-    token = NULL;
     
     /* to erase last null string in vector */
     tonightWInfo.pop_back();
@@ -106,7 +109,7 @@ void informWeather() {
             
             /* There is no information about chance of rain. */
         case 0:
-            snprintf(popenParam, 200, "say %s, and  %s,  Sir",
+            snprintf(popenParam, STRINGSIZE, "say %s, and  %s,  Sir",
                      todayWInfo[0].c_str(), tonightWInfo[0].c_str());
             /* output info */
             cout << "    " << todayWInfo[0] << "." << endl;
@@ -115,7 +118,7 @@ void informWeather() {
             
             /* Just today has information about chanc of rain. */
         case 1:
-            snprintf(popenParam, 200, "say %s, and  %s, %s,  Sir",
+            snprintf(popenParam, STRINGSIZE, "say %s, and  %s, %s,  Sir",
                      todayWInfo[0].c_str(), todayWInfo.back().c_str(), tonightWInfo[0].c_str());
             /* output info */
             cout << "    " << todayWInfo[0] << "." << todayWInfo.back().c_str() << "." << endl;
@@ -125,7 +128,7 @@ void informWeather() {
             
             /* Just tonight has information about chanc of rain. */
         case 2:
-            snprintf(popenParam, 200, "say %s, and  %s, %s, Sir",
+            snprintf(popenParam, STRINGSIZE, "say %s, and  %s, %s, Sir",
                      todayWInfo[0].c_str(), tonightWInfo[0].c_str(), tonightWInfo.back().c_str());
             /* output info */
             cout << "    " << todayWInfo[0] << "." << endl;
@@ -134,12 +137,11 @@ void informWeather() {
             
             /* Both has information about chance of rain. */
         case 3:
-            snprintf(popenParam, 200, "say Seoul, South Korea, %s, and  %s, %s, %s, Sir",
+            snprintf(popenParam, STRINGSIZE, "say Seoul, South Korea, %s, and  %s, %s, %s, Sir",
                      todayWInfo[0].c_str(), todayWInfo.back().c_str(), tonightWInfo[0].c_str(), tonightWInfo.back().c_str());
             /* output info */
             cout << "    " << todayWInfo[0] << "." << todayWInfo.back() << "." << endl;
             cout << "    " << tonightWInfo[0] << "." << tonightWInfo.back() <<" Sir."<< endl;
-            
             break;
         default:
             break;
@@ -147,8 +149,6 @@ void informWeather() {
     
     /* pipe open to say Today or Tonight - ... */
     pipeOpen(popenParam);
-    pclose ( file );
-    
     /* clear vector */
     todayWInfo.clear();
     tonightWInfo.clear();
@@ -167,6 +167,11 @@ void informTime(){
     FILE * file;
     
     int hour = t->tm_hour;
+    if (t->tm_min < 10){
+        sprintf(oTime, "%d:0%d", hour, t->tm_min );
+    }else {
+        sprintf(oTime, "%d:%d", hour, t->tm_min );
+    }
     
     
     cout << "Jasfom speaking..." << endl;
@@ -204,13 +209,7 @@ int main(int argc, const char*argv[])
     string parameters[6] = {"who", "pintos", "weather", "wt", "time"};
     
     if (argc > 1){
-        
-        /* Human friendly message.
-         for (int i=0; i<argc-1; i++){
-         args += argv[i+1];
-         args += " ";
-         }*/
-        
+
         /* when "who" command */
         if (!(strcmp(argv[1], parameters[0].c_str())))
         {
