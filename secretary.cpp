@@ -5,7 +5,6 @@
 /* Jasfom was born 2015. 4. 17 */
 /* This is the first Version. 1.0 */
 
-
 #include <iostream>
 #include <vector>
 #include <cstdio>
@@ -14,6 +13,67 @@
 
 #define STRINGSIZE 200
 using namespace std;
+
+
+void outputJasfomInfo();
+bool pipeOpen(const char * comm);
+char * pipeOpen(const char * comm, const char * type);
+void informWeather();
+void informTime();
+
+int main(int argc, const char*argv[])
+{
+    string args;
+    string parameters[6] = {"who", "pintos", "weather", "wt", "time"};
+    
+    if (argc > 1){
+
+        /* when "who" command */
+        if (!(strcmp(argv[1], parameters[0].c_str())))
+        {
+            cout << "Jasfom speaking..." << endl;
+            outputJasfomInfo();
+            pipeOpen("say I am your secretary Jasfom, Sir.");
+        }
+        
+        /* when "pintos" command */
+        if(!(strcmp(argv[1], parameters[1].c_str())))
+        {
+            cout << "Jasfom speaking..." << endl;
+            cout << "   You need to do pintos study. Sir." << endl;
+            pipeOpen("say You need to do pintos study. Sir.");
+        }
+        
+        /* when "wt or weather" command */
+        if (!(strcmp(argv[1], parameters[2].c_str())) || !(strcmp(argv[1], parameters[3].c_str()))){
+            informWeather();
+        }
+        
+        /* when "time" command */
+        if (!(strcmp(argv[1], parameters[4].c_str()))){
+            informTime();
+        }
+    }
+    else {
+        /* when just input jasfom*/
+        cout << "Jasfom speaking..." << endl;
+        cout << "   What can I help you?, Sir." << endl;
+        pipeOpen("say What can I help you?, Sir.");
+    }
+    return 0;
+}
+
+void outputJasfomInfo(){
+    cout << "\nI am your secretary " << endl;
+    
+    cout << "     ________  __          _________  ________  ________    __    __        " << endl;
+    cout << "    /____  _/ /  \\        / _______/ / ______/ / ____   \\  /  \\  /  \\       " << endl;
+    cout << "        / /  / /\\ \\       \\ \\___    / /_____  / /    \\  / / /\\ \\/ /\\ \\      " << endl;
+    cout << "   __  / /  / /__\\ \\       \\___ \\  / ______/ / /     / / / /  \\__/  \\ \\     " << endl;
+    cout << "   \\ \\/ /  /  ____  \\   ______/ / / /       /  \\____/ / / /          \\ \\    " << endl;
+    cout << "    \\__/  /_/      \\_\\ /_______/ /_/        \\________/ /_/            \\_\\   " << endl << endl;
+    
+}
 
 /* To execute command */
 bool pipeOpen(const char * comm){
@@ -27,7 +87,7 @@ bool pipeOpen(const char * comm){
 
 /* To get weather Information */
 char * pipeOpen(const char * comm, const char * type) {
-
+    
     static char buffer[STRINGSIZE];
     FILE * file = popen(comm, "r");
     fgets (buffer, STRINGSIZE, file);
@@ -58,7 +118,7 @@ void informWeather() {
     
     /* TODAY procedure */
     /* pipe open to get TODAY's weather infomation, and save to buffer */
-
+    
     weatherInfo = pipeOpen("curl -s https://weather.yahoo.com/south-korea/seoul/seoul-1132599/ | awk '/Today -/' | textutil -convert txt -stdin -stdout -format html", "r");
     
     /* tokenizing procedure */
@@ -207,50 +267,3 @@ void informTime(){
         pipeOpen(popenParam);
     }
 }
-
-
-int main(int argc, const char*argv[])
-{
-    string args;
-    string parameters[6] = {"who", "pintos", "weather", "wt", "time"};
-    
-    if (argc > 1){
-
-        /* when "who" command */
-        if (!(strcmp(argv[1], parameters[0].c_str())))
-        {
-            cout << "Jasfom speaking..." << endl;
-            cout << "   I am your secretary Jasfom, Sir." << endl;
-            pipeOpen("say I am your secretary Jasfom, Sir.");
-        }
-        
-        /* when "pintos" command */
-        if(!(strcmp(argv[1], parameters[1].c_str())))
-        {
-            cout << "Jasfom speaking..." << endl;
-            cout << "   You need to do pintos study. Sir." << endl;
-            pipeOpen("say You need to do pintos study. Sir.");
-        }
-        
-        /* when "wt or weather" command */
-        if (!(strcmp(argv[1], parameters[2].c_str())) || !(strcmp(argv[1], parameters[3].c_str()))){
-            informWeather();
-        }
-        
-        /* when "time" command */
-        if (!(strcmp(argv[1], parameters[4].c_str()))){
-            informTime();
-        }
-    }
-    else {
-        /* when just input jasfom*/
-        cout << "Jasfom speaking..." << endl;
-        cout << "   What can I help you?, Sir." << endl;
-        pipeOpen("say What can I help you?, Sir.");
-    }
-    return 0;
-}
-
-
-
-
