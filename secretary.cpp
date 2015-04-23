@@ -12,46 +12,60 @@
 #include <unistd.h>
 
 #define STRINGSIZE 200
-using namespace std;
 
+using namespace std;
 
 void outputJasfomInfo();
 bool pipeOpen(const char * comm);
 char * pipeOpen(const char * comm, const char * type);
 void informWeather();
 void informTime();
+void readyPintos();
+void outputMacInfo();
+void man();
+void exitMac();
 
 int main(int argc, const char*argv[])
 {
     string args;
-    string parameters[6] = {"who", "pintos", "weather", "wt", "time"};
+    string parameters[8] = {"who", "pintos", "weather", "wt", "time", "man", "amac", "exit"};
     
     if (argc > 1){
 
-        /* when "who" command */
+        /* when "jasfom who" command */
         if (!(strcmp(argv[1], parameters[0].c_str())))
         {
-            cout << "Jasfom speaking..." << endl;
             outputJasfomInfo();
-            pipeOpen("say I am your secretary Jasfom, Sir.");
         }
         
-        /* when "pintos" command */
+        /* when "jasfom pintos" command */
         if(!(strcmp(argv[1], parameters[1].c_str())))
         {
-            cout << "Jasfom speaking..." << endl;
-            cout << "   You need to do pintos study. Sir." << endl;
-            pipeOpen("say You need to do pintos study. Sir.");
+            readyPintos();
         }
         
-        /* when "wt or weather" command */
+        /* when "jasfom wt or weather" command */
         if (!(strcmp(argv[1], parameters[2].c_str())) || !(strcmp(argv[1], parameters[3].c_str()))){
             informWeather();
         }
         
-        /* when "time" command */
+        /* when "jasfom time" command */
         if (!(strcmp(argv[1], parameters[4].c_str()))){
             informTime();
+        }
+        /* when "jasfom man" command */
+        if (!(strcmp(argv[1], parameters[5].c_str()))){
+            man();
+        }
+
+        /* when "jasfom amac" command */
+        if (!(strcmp(argv[1], parameters[6].c_str()))){
+            outputMacInfo();
+        }
+        
+        /* when "jasfom exit" command */
+        if (!(strcmp(argv[1], parameters[7].c_str()))){
+            exitMac();
         }
     }
     else {
@@ -64,30 +78,30 @@ int main(int argc, const char*argv[])
 }
 
 void outputJasfomInfo(){
+    cout << "Jasfom speaking..." << endl;
     cout << "\nI am your secretary " << endl;
-    
     cout << "     ________  __          _________  ________  ________    __    __        " << endl;
     cout << "    /____  _/ /  \\        / _______/ / ______/ / ____   \\  /  \\  /  \\       " << endl;
     cout << "        / /  / /\\ \\       \\ \\___    / /_____  / /    \\  / / /\\ \\/ /\\ \\      " << endl;
     cout << "   __  / /  / /__\\ \\       \\___ \\  / ______/ / /     / / / /  \\__/  \\ \\     " << endl;
     cout << "   \\ \\/ /  /  ____  \\   ______/ / / /       /  \\____/ / / /          \\ \\    " << endl;
     cout << "    \\__/  /_/      \\_\\ /_______/ /_/        \\________/ /_/            \\_\\   " << endl << endl;
-    
+    pipeOpen("say I am your secretary Jasfom, Sir.");
 }
 
 /* To execute command */
 bool pipeOpen(const char * comm){
     FILE * file = popen(comm, "r");
-    
     if (file == NULL)
         return false;
     pclose(file);
     return true;
 }
 
-/* To get weather Information */
+/* To get char string from file */
+/* return type : char * */
+/* parameters : char * comm, char * type */
 char * pipeOpen(const char * comm, const char * type) {
-    
     static char buffer[STRINGSIZE];
     FILE * file = popen(comm, "r");
     fgets (buffer, STRINGSIZE, file);
@@ -139,7 +153,7 @@ void informWeather() {
     
     /* tokening procedure */
     token = strtok (weatherInfo, ".");
-    
+
     /* tokenize and push it to tonight's vector */
     while (token != NULL)
     {
@@ -266,4 +280,50 @@ void informTime(){
         sprintf(popenParam, "say Its %d %d AM. Sir, Today is the first day of the rest of your life.", t->tm_hour, t->tm_min);
         pipeOpen(popenParam);
     }
+}
+
+void readyPintos(){
+    pipeOpen("open -a Sublime\\ Text\\ 2.app");
+    pipeOpen("open -a Terminal.app");
+    pipeOpen("open /Users/jowon/Dropbox/OS/Pintos.pdf");
+    cout << "Jasfom speaking..." << endl;
+    cout << "   Now you can do pintos programming. Sir." << endl;
+    pipeOpen("say Now you can do pintos programming. Sir.");
+
+}
+
+void outputMacInfo(){
+    cout << "\nJasfom Speaking..." << endl;
+    cout << "   This imformations are about your MacBook Air. Sir\n" << endl;
+    cout << pipeOpen("scutil --get ComputerName;", "r");
+    cout << pipeOpen("sysctl -n hw.memsize | awk '{print $0/1073741824\"GB RAM\"}';", "r");
+    cout << pipeOpen("sw_vers | awk -F':\t' '{print $2}' | paste -d ' ' - - -;", "r");
+    cout << pipeOpen("df -Hl | grep 'disk1' | awk '{print $4\"B/\"$2\"B free (\"$5\" used)\"}'", "r");
+    pipeOpen("say This imformations are about your MacBook Air. Sir");
+
+}
+void man(){
+    cout << "Jasfom speaking..." << endl;
+    cout << "	This is manuals of me. Sir" << endl;
+    cout << " ------------------------------------- " << endl;
+    cout << "	jasfom who" << endl;
+    cout << "	jasfom exit" << endl;
+    cout << "	jasfom pintos" << endl;
+    cout << "	jasfom weather or wt" << endl;
+    cout << "	jasfom time" << endl;
+    cout << "	jasfom amac" << endl;
+    cout << " ------------------------------------- " << endl;
+    pipeOpen("say This is manuals of me. Sir");
+}
+
+void exitMac() {
+    cout << "Jasfom speaking..." << endl;
+    cout << "   Do you really want to shutdown MacBook? (y/n)" << endl;
+    pipeOpen("say Do you really want to shutdown MacBook?");
+    char ch;
+    cin>>ch;
+    if (ch == 'y')
+        pipeOpen("sudo shutdown -h +0");
+    else if(ch == 'n')
+        cout << "   Canceled!   " <<endl;
 }
